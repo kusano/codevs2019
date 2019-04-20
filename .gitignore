@@ -1,7 +1,6 @@
 /.vs
 /codevs
-/Debug
-/Release
+/x64
 /account.txt
 /codevs.jnlp
 /codevs2019.vcxproj.user
