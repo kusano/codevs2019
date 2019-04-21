@@ -3,16 +3,24 @@
 using namespace std;
 
 #include "ai_random.h"
+#include "ai_chainer.h"
+
+//  test.cpp
+void test();
 
 void readInitial(Status *status);
 void readTurn(Status *status);
 
 int main()
 {
+    //test();
+    //return 0;
+
     cout<<"A.L.I.C.E."<<endl;
 
     Status status;
-    AIRandom ai;
+    //AIRandom ai;
+    AIChainer ai;
 
     readInitial(&status);
     ai.initialize(status);
