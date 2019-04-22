@@ -7,6 +7,7 @@ using namespace std;
 
 void AIAlice::initialize(Game &game, int seed)
 {
+    random.seed(seed);
 };
 
 Move AIAlice::think(Game &game)
@@ -60,9 +61,10 @@ void AIAlice::generateMove(Game &game)
 
                 //  連鎖候補は長く、ブロックは多く、高さは低く
                 long long score =
-                    field.candChain()*10000 +
-                    -field.maxHeight()*100 +
-                    -field.blockNum();
+                    field.candChain()*1000000LL +
+                    -field.maxHeight()*10000LL +
+                    -field.blockNum()*100LL +
+                    random()%64;
 
                 Node nodeNew;
                 nodeNew.score = score;
