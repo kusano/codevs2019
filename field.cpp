@@ -199,9 +199,12 @@ void Field::undo()
     }
 
     //  各数値を戻す
-    histOjama.push_back(ojama);
-    histSkill.push_back(skill);
-    histScore.push_back(score);
+    ojama = histOjama.back();
+    histOjama.pop_back();
+    skill = histSkill.back();
+    histSkill.pop_back();
+    score = histScore.back();
+    histScore.pop_back();
 }
 
 bool Field::isDead()
