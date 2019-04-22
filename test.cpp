@@ -117,7 +117,7 @@ void test2();
 void test()
 {
     test1();
-    test2();
+    //test2();
 }
 
 void test1()
@@ -136,7 +136,14 @@ void test1()
         field.move(Move(random()%9, random()%4, false), samplePacks[i]);
         assert(i==253 || !field.isDead());
     }
+
     assert(field.isDead());
+    field.undo();
+    assert(!field.isDead());
+    assert(memcmp(old[253], field.field, sizeof old[253])==0);
+
+    field.move(Move(0, 0, true), nullptr);
+
     for (int i=253; i>=0; i--)
     {
         field.undo();

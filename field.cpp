@@ -79,7 +79,7 @@ Result Field::move(Move move, char pack[4])
         for (int x=0; x<W; x++)
         for (int y=0; y<H; y++)
         {
-            if (field[y][x]==5)
+            if (field[x][y]==5)
             {
                 for (int dx=-1; dx<=1; dx++)
                 for (int dy=-1; dy<=1; dy++)
