@@ -51,8 +51,8 @@ public:
     static_assert((char)-1 == -1, "char sign");
     char field[W][H] = {};
 
-    Result move(Move move, char pack[4]);
-    void undo();
+    Result move(Move move, char pack[4], bool candChain=false);
+    void undo(bool candChain=false);
 
     bool isDead();
     int candChain();

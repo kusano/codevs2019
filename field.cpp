@@ -6,29 +6,48 @@ using namespace std;
 
 vector<Field::Pos> Field::erasePos;
 
-Result Field::move(Move move, char pack[4])
+//  candChain=trueならばcandChain専用の処理
+Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
 {
-    //  命令前の各値を記憶
-    histOjama.push_back(ojama);
-    histSkill.push_back(skill);
-    histScore.push_back(score);
+    if (!candChain)
+    {
+        //  命令前の各値を記憶
+        histOjama.push_back(ojama);
+        histSkill.push_back(skill);
+        histScore.push_back(score);
+    }
 
     size_t blockNumBefore = histBlock.size();
 
     //  お邪魔ブロック
     if (ojama >= 10)
     {
-        ojama -= 10;
-
-        for (int x=0; x<W; x++)
+        if (candChain)
         {
+            //  ojamaの値を変動させない
+            //  パックの位置にのみ落とす
             for (int y=0; y<H; y++)
-                if (field[x][y]==0)
+                if (field[move.pos][y]==0)
                 {
-                    field[x][y] = 11;
-                    histBlock.push_back(Block(true, x, y, 11));
+                    field[move.pos][y] = 11;
+                    histBlock.push_back(Block(true, move.pos, y, 11));
                     break;
                 }
+        }
+        else
+        {
+            ojama -= 10;
+
+            for (int x=0; x<W; x++)
+            {
+                for (int y=0; y<H; y++)
+                    if (field[x][y]==0)
+                    {
+                        field[x][y] = 11;
+                        histBlock.push_back(Block(true, x, y, 11));
+                        break;
+                    }
+            }
         }
     }
 
@@ -99,37 +118,53 @@ Result Field::move(Move move, char pack[4])
     }
     else
     {
-        //  パックの落下
-        char p[2][2];
-        static int rotate[4][2][2] =
+        if (candChain)
         {
-            {{2, 0}, {3, 1}},
-            {{3, 2}, {1, 0}},
-            {{1, 3}, {0, 2}},
-            {{0, 1}, {2, 3}},
-        };
-        for (int x=0; x<2; x++)
-        for (int y=0; y<2; y++)
-            p[x][y] = pack[rotate[move.rotate][x][y]];
-
-        for (int x=0; x<2; x++)
-            if (p[x][0]==0)
-            {
-                p[x][0] = p[x][1];
-                p[x][1] = 0;
-            }
-
-        for (int x=0; x<2; x++)
-        {
+            //  pack[0]を落とす
             for (int y=0; y<H; y++)
-                if (field[move.pos+x][y]==0)
+                if (field[move.pos][y]==0)
                 {
-                    field[move.pos+x][y] = p[x][0];
-                    histBlock.push_back(Block(true, move.pos+x, y, p[x][y]));
-                    field[move.pos+x][y+1] = p[x][1];
-                    histBlock.push_back(Block(true, move.pos+x, y+1, p[x][y]));
+                    field[move.pos][y] = pack[0];
+                    histBlock.push_back(Block(true, move.pos, y, pack[0]));
                     break;
                 }
+        }
+        else
+        {
+            //  パックの落下
+            char p[2][2];
+            static int rotate[4][2][2] =
+            {
+                {{2, 0}, {3, 1}},
+                {{3, 2}, {1, 0}},
+                {{1, 3}, {0, 2}},
+                {{0, 1}, {2, 3}},
+            };
+            for (int x=0; x<2; x++)
+            for (int y=0; y<2; y++)
+                p[x][y] = pack[rotate[move.rotate][x][y]];
+
+            for (int x=0; x<2; x++)
+                if (p[x][0]==0)
+                {
+                    p[x][0] = p[x][1];
+                    p[x][1] = 0;
+                }
+
+            for (int x=0; x<2; x++)
+            {
+                for (int y=0; y<H; y++)
+                    if (field[move.pos+x][y]==0)
+                    {
+                        field[move.pos+x][y] = p[x][0];
+                        histBlock.push_back(
+                            Block(true, move.pos+x, y, p[x][y]));
+                        field[move.pos+x][y+1] = p[x][1];
+                        histBlock.push_back(
+                            Block(true, move.pos+x, y+1, p[x][y]));
+                        break;
+                    }
+            }
         }
     }
 
@@ -171,7 +206,8 @@ Result Field::move(Move move, char pack[4])
     return Result(chain);
 }
 
-void Field::undo()
+//  candChain=trueならばcandChain専用の処理
+void Field::undo(bool candChain/*=false*/)
 {
     //  ブロックを元に戻す
     int num = histBlockNum.back();
@@ -198,13 +234,16 @@ void Field::undo()
         }
     }
 
-    //  各数値を戻す
-    ojama = histOjama.back();
-    histOjama.pop_back();
-    skill = histSkill.back();
-    histSkill.pop_back();
-    score = histScore.back();
-    histScore.pop_back();
+    if (!candChain)
+    {
+        //  各数値を戻す
+        ojama = histOjama.back();
+        histOjama.pop_back();
+        skill = histSkill.back();
+        histSkill.pop_back();
+        score = histScore.back();
+        histScore.pop_back();
+    }
 }
 
 bool Field::isDead()
@@ -218,20 +257,17 @@ bool Field::isDead()
 //  ブロックを1個落としたときの最大チェイン数を返す
 int Field::candChain()
 {
-    //  TODO: move/undoを使うとお邪魔ブロックが落下し、無駄な処理がある
+    char pack[4] = {};
+
     int maxChain = 0;
     for (int x=0; x<W; x++)
     for (int b=1; b<=9; b++)
     {
-        char pack[4] = {};
-        if (x<W-1)
-            pack[2] = b;
-        else
-            pack[3] = b;
-        Move move(x<W-1 ? x : x-1, 0, false);
+        pack[0] = b;
+        Move move(x, 0, false);
 
-        Result result = this->move(move, pack);
-        undo();
+        Result result = this->move(move, pack, true);
+        undo(true);
 
         maxChain = max(maxChain, result.chain);
     }
