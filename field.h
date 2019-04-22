@@ -25,6 +25,18 @@ struct Result
         chain(chain) {}
 };
 
+//  履歴以外のフィールドの情報
+class State
+{
+public:
+    int time = 0;
+    long long ojama = 0;
+    int skill = 0;
+    long long score = 0;
+    //char field[Field::W][Field::H] = {};
+    char field[10][19] = {};
+};
+
 //  1人分のフィールド
 class Field
 {
@@ -41,10 +53,15 @@ public:
 
     Result move(Move move, char pack[4]);
     void undo();
+
     bool isDead();
     int candChain();
     int maxHeight();
     int blockNum();
+
+    void save(State *state);
+    void load(State &state);
+
     std::string toString();
 
 private:

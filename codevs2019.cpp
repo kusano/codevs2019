@@ -4,6 +4,7 @@ using namespace std;
 
 #include "ai_random.h"
 #include "ai_chainer.h"
+#include "ai_alice.h"
 
 //  test.cpp
 void test();
@@ -20,7 +21,8 @@ int main()
 
     Game game;
     //AIRandom ai;
-    AIChainer ai;
+    //AIChainer ai;
+    AIAlice ai;
 
     readInitial(&game);
     ai.initialize(game);

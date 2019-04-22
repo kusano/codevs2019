@@ -255,6 +255,24 @@ int Field::blockNum()
     return n;
 }
 
+void Field::save(State *state)
+{
+    state->time = time;
+    state->ojama = ojama;
+    state->skill = skill;
+    state->score = score;
+    memcpy(state->field, field, sizeof state->field);
+}
+
+void Field::load(State &state)
+{
+    time = state.time;
+    ojama = state.ojama;
+    skill = state.skill;
+    score = state.score;
+    memcpy(field, state.field, sizeof field);
+}
+
 string Field::toString()
 {
     stringstream ss;
