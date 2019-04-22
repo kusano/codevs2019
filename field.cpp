@@ -1,6 +1,7 @@
 #include "field.h"
 #include <algorithm>
 #include <sstream>
+#include <cassert>
 
 using namespace std;
 
@@ -37,20 +38,23 @@ Result Field::move(Move move, char pack[4])
     {
         int num = 0;
 
-        //  undoの処理のため、yの降順にソート
-        //  TODO: 遅いので何とかする
-        sort(erasePos.begin(), erasePos.end(),
-            [](const Pos &a, const Pos &b) {return a.y > b.y;});
-
+#ifndef NDEBUG
+        //  yの降順で並んでいないとundoに失敗する
+        for (size_t i=0; i+1<erasePos.size(); i++)
+        {
+            assert(erasePos[i].y >= erasePos[i+1].y);
+        }
+#endif
         for (Pos &pos: erasePos)
-            //  重複して登録されている場合がある
-            if (field[pos.x][pos.y] != 0)
-            {
-                histBlock.push_back(
-                    Block(false, pos.x, pos.y, field[pos.x][pos.y]));
-                field[pos.x][pos.y] = 0;
-                num++;
+        {
+            //assert(field[pos.x][pos.y] != 0);
+            if (field[pos.x][pos.y] != 0){
+            histBlock.push_back(
+                Block(false, pos.x, pos.y, field[pos.x][pos.y]));
+            field[pos.x][pos.y] = 0;
+            num++;
             }
+        }
         erasePos.clear();
 
         for (int x=0; x<W; x++)
@@ -76,26 +80,27 @@ Result Field::move(Move move, char pack[4])
     if (move.bomb)
     {
         //  爆発
+        //  上から順に消す
+        for (int y=H-1; y>=0; y--)
         for (int x=0; x<W; x++)
-        for (int y=0; y<H; y++)
-        {
-            if (field[y][x]==5)
+            if (0<=field[x][y] && field[x][y]<=9)
             {
-                for (int dx=-1; dx<=1; dx++)
-                for (int dy=-1; dy<=1; dy++)
+                bool e = false;
+                for (int dx=-1; dx<=1 && !e; dx++)
+                for (int dy=-1; dy<=1 && !e; dy++)
                 {
-                    int tx = x + dx;
-                    int ty = y + dy;
-                    if (0<=tx && tx<W &&
-                        0<=ty && ty<H &&
-                        0<=field[tx][ty] && field[tx][ty]<=9)
+                    int fx = x + dx;
+                    int fy = y + dy;
+                    if (0<=fx && fx<W &&
+                        0<=fy && fy<H &&
+                        field[fx][fy]==5)
                     {
-                        erasePos.push_back(Pos(tx, ty));
+                        e = true;
                     }
                 }
+                if (e)
+                    erasePos.push_back(Pos(x, y));
             }
-        }
-        erase();
     }
     else
     {
@@ -138,25 +143,26 @@ Result Field::move(Move move, char pack[4])
 
     while (true)
     {
-        static int DX[] = {0, 1, 1, 1};
-        static int DY[] = {1, 1, 0, -1};
-
-        for (int d=0; d<4; d++)
+        //  上から順に消す
+        for (int y=H-1; y>=0; y--)
+        for (int x=0; x<W; x++)
         {
-            int dx = DX[d];
-            int dy = DY[d];
-            int fx = 0;
-            int tx = dx==1 ? W-1 : W;
-            int fy = dy==-1 ? 1 : 0;
-            int ty = dy==1 ? H-1 : H;
-
-            for (int x=fx; x<tx; x++)
-            for (int y=fy; y<ty; y++)
-                if (field[x][y]+field[x+dx][y+dy]==10)
+            bool e = false;
+            for (int dx=-1; dx<=1 && !e; dx++)
+            for (int dy=-1; dy<=1 && !e; dy++)
+            if (dx!=0 || dy!=0)
+            {
+                int tx = x + dx;
+                int ty = y + dy;
+                if (0<=tx && tx<W &&
+                    0<=ty && ty<H &&
+                    field[x][y]+field[tx][ty]==10)
                 {
-                    erasePos.push_back(Pos(x, y));
-                    erasePos.push_back(Pos(x+dx, y+dy));
+                    e = true;
                 }
+            }
+            if (e)
+                erasePos.push_back(Pos(x, y));
         }
 
         if (erasePos.empty())
