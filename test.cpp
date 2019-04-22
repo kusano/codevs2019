@@ -160,7 +160,7 @@ void test2()
     memcpy(game.packs, samplePacks, sizeof game.packs);
 
     AIAlice ai;
-    ai.initialize(game);
+    ai.initialize(game, 0);
 
     chrono::system_clock::time_point start = chrono::system_clock::now();
 

@@ -1,10 +1,10 @@
 #include <iostream>
+#include <cstdlib>
 #include <cassert>
-using namespace std;
-
 #include "ai_random.h"
 #include "ai_chainer.h"
 #include "ai_alice.h"
+using namespace std;
 
 //  test.cpp
 void test();
@@ -12,12 +12,16 @@ void test();
 void readInitial(Game *game);
 void readTurn(Game *game);
 
-int main()
+int main(int argc, char **argv)
 {
     //test();
     //return 0;
 
     cout<<"A.L.I.C.E."<<endl;
+
+    int seed = 0;
+    if (argc>1)
+        seed = atoi(argv[1]);
 
     Game game;
     //AIRandom ai;
@@ -25,7 +29,7 @@ int main()
     AIAlice ai;
 
     readInitial(&game);
-    ai.initialize(game);
+    ai.initialize(game, seed);
 
     for (int turn=0; turn<Game::MaxTurn; turn++)
     {

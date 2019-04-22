@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void AIAlice::initialize(Game &game)
+void AIAlice::initialize(Game &game, int seed)
 {
 };
 

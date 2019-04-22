@@ -1,8 +1,8 @@
 #include "ai_random.h"
 
-void AIRandom::initialize(Game &game)
+void AIRandom::initialize(Game &game, int seed)
 {
-    random.seed(1234);
+    random.seed(seed);
 };
 
 Move AIRandom::think(Game &game)

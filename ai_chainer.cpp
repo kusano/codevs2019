@@ -3,7 +3,7 @@
 
 using namespace std;
 
-void AIChainer::initialize(Game &game)
+void AIChainer::initialize(Game &game, int seed)
 {
 };
 

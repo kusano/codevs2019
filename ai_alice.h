@@ -5,7 +5,7 @@
 class AIAlice: AI
 {
 public:
-    void initialize(Game &game) override;
+    void initialize(Game &game, int seed) override;
     Move think(Game &game) override;
 
 private:
