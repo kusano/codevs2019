@@ -1,6 +1,7 @@
 #include "field.h"
 #include <algorithm>
 #include <sstream>
+#include <cstring>
 
 using namespace std;
 
