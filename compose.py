@@ -1,14 +1,16 @@
 F = [
   # h
   "field.h",
-  "status.h",
+  "game.h",
   "ai.h",
   "ai_random.h",
   "ai_chainer.h",
+  "ai_alice.h",
   # cpp
   "field.cpp",
   "ai_random.cpp",
   "ai_chainer.cpp",
+  "ai_alice.cpp",
   "codevs2019.cpp",
 ]
 

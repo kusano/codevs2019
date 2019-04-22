@@ -153,6 +153,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ai_alice.cpp" />
     <ClCompile Include="ai_chainer.cpp" />
     <ClCompile Include="ai_random.cpp" />
     <ClCompile Include="codevs2019.cpp" />
@@ -161,6 +162,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ai.h" />
+    <ClInclude Include="ai_alice.h" />
     <ClInclude Include="ai_chainer.h" />
     <ClInclude Include="ai_random.h" />
     <ClInclude Include="field.h" />
