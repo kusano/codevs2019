@@ -3,12 +3,12 @@
 #include "field.h"
 
 //  ゲーム全体の状態
-class Status
+class Game
 {
 public:
-    static const int maxTurn = 500;
+    static const int MaxTurn = 500;
 
-    char packs[maxTurn][4] = {};
+    char packs[MaxTurn][4] = {};
     int turn = 0;
     Field fields[2];
 };

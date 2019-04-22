@@ -6,8 +6,8 @@
 class AIRandom: AI
 {
 public:
-    void initialize(Status &status) override;
-    Move think(Status &status) override;
+    void initialize(Game &game) override;
+    Move think(Game &game) override;
 
 private:
     std::mt19937 random;

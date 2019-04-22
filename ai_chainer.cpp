@@ -3,14 +3,14 @@
 
 using namespace std;
 
-void AIChainer::initialize(Status &status)
+void AIChainer::initialize(Game &game)
 {
 };
 
-Move AIChainer::think(Status &status)
+Move AIChainer::think(Game &game)
 {
     Move move;
-    search(0, 2, status.fields[0], status.packs+status.turn, &move);
+    search(0, 2, game.fields[0], game.packs+game.turn, &move);
     return move;
 }
 

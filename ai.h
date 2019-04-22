@@ -1,10 +1,10 @@
 #pragma once
 
-#include "status.h"
+#include "game.h"
 
 class AI
 {
 public:
-    virtual void initialize(Status &status) = 0;
-    virtual Move think(Status &status) = 0;
+    virtual void initialize(Game &game) = 0;
+    virtual Move think(Game &game) = 0;
 };

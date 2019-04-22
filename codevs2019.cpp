@@ -8,8 +8,8 @@ using namespace std;
 //  test.cpp
 void test();
 
-void readInitial(Status *status);
-void readTurn(Status *status);
+void readInitial(Game *game);
+void readTurn(Game *game);
 
 int main()
 {
@@ -18,17 +18,17 @@ int main()
 
     cout<<"A.L.I.C.E."<<endl;
 
-    Status status;
+    Game game;
     //AIRandom ai;
     AIChainer ai;
 
-    readInitial(&status);
-    ai.initialize(status);
+    readInitial(&game);
+    ai.initialize(game);
 
-    for (int turn=0; turn<Status::maxTurn; turn++)
+    for (int turn=0; turn<Game::MaxTurn; turn++)
     {
-        readTurn(&status);
-        Move move = ai.think(status);
+        readTurn(&game);
+        Move move = ai.think(game);
 
         if (move.bomb)
             cout<<"S"<<endl;
@@ -38,15 +38,15 @@ int main()
 }
 
 //  ゲーム開始時の読み込み
-void readInitial(Status *status)
+void readInitial(Game *game)
 {
-    for (int turn=0; turn<Status::maxTurn; turn++)
+    for (int turn=0; turn<Game::MaxTurn; turn++)
     {
         for (int i=0; i<4; i++)
         {
             int tmp;
             cin>>tmp;
-            status->packs[turn][i] = (char)tmp;
+            game->packs[turn][i] = (char)tmp;
         }
         string end;
         cin>>end;
@@ -55,12 +55,12 @@ void readInitial(Status *status)
 }
 
 //  ターンごとの読み込み
-void readTurn(Status *status)
+void readTurn(Game *game)
 {
-    cin>>status->turn;
+    cin>>game->turn;
     for (int i=0; i<2; i++)
     {
-        Field &f = status->fields[i];
+        Field &f = game->fields[i];
         cin>>f.time;
         cin>>f.ojama;
         cin>>f.skill;

@@ -2,7 +2,7 @@
 #include <random>
 #include <cstring>
 #include <cassert>
-#include "status.h"
+#include "game.h"
 using namespace std;
 
 char samplePacks[500][4] =
@@ -121,7 +121,7 @@ void test1()
     //  Field::move/undo/candChain
     Field field;
 
-    char old[Status::maxTurn][Field::W][Field::H];
+    char old[Game::MaxTurn][Field::W][Field::H];
     mt19937 random;
     for (int i=0; i<254; i++)
     {
