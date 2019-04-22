@@ -1,8 +1,10 @@
 #include <iostream>
 #include <random>
 #include <cstring>
+#include <chrono>
 #include <cassert>
 #include "game.h"
+#include "ai_alice.h"
 using namespace std;
 
 char samplePacks[500][4] =
@@ -110,10 +112,12 @@ char samplePacks[500][4] =
 };
 
 void test1();
+void test2();
 
 void test()
 {
     test1();
+    test2();
 }
 
 void test1()
@@ -138,4 +142,22 @@ void test1()
         field.undo();
         assert(memcmp(old[i], field.field, sizeof old[i])==0);
     }
+}
+
+void test2()
+{
+    Game game;
+    memcpy(game.packs, samplePacks, sizeof game.packs);
+
+    AIAlice ai;
+    ai.initialize(game);
+
+    chrono::system_clock::time_point start = chrono::system_clock::now();
+
+    Move move = ai.think(game);
+
+    chrono::system_clock::time_point end = chrono::system_clock::now();
+    double duration =
+        chrono::duration_cast<chrono::nanoseconds>(end-start).count() * 1e-9;
+    cout<<duration<<endl;
 }
