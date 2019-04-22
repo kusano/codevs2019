@@ -218,7 +218,7 @@ int Field::candChain()
     //  TODO: move/undoを使うとお邪魔ブロックが落下し、無駄な処理がある
     int maxChain = 0;
     for (int x=0; x<W; x++)
-    for (int b=0; b<H; b++)
+    for (int b=1; b<=9; b++)
     {
         char pack[4] = {};
         if (x<W-1)
