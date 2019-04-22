@@ -11,7 +11,7 @@ public:
 
 private:
     static const int BeamDepth = 16;
-    static const int BeamWidth = 128;
+    static const int BeamWidth = 256;
 
     std::mt19937 random;
     std::vector<Move> moves;
