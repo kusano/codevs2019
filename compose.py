@@ -6,11 +6,13 @@ F = [
   "ai_random.h",
   "ai_chainer.h",
   "ai_alice.h",
+  "table.h",
   # cpp
   "field.cpp",
   "ai_random.cpp",
   "ai_chainer.cpp",
   "ai_alice.cpp",
+  "table.cpp",
   "codevs2019.cpp",
 ]
 
