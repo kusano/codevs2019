@@ -19,10 +19,20 @@ struct Move
 //  結果
 struct Result
 {
-    int chain = 0;
+    //  連鎖数
+    int chain;
+    //  発生したお邪魔ブロック数
+    long long ojama;
+    //  相殺後も残った相手に送られるお邪魔ブロック数
+    long long ojamaRest;
+    //  スキル減少量
+    int skillReduce;
 
-    Result(int chain):
-        chain(chain) {}
+    Result(int chain, long long ojama, long long ojamaRest, int skillReduce):
+        chain(chain),
+        ojama(ojama),
+        ojamaRest(ojamaRest),
+        skillReduce(skillReduce) {}
 };
 
 //  履歴以外のフィールドの情報

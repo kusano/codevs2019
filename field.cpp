@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <sstream>
 #include <cstring>
+#include "table.h"
 
 using namespace std;
 
@@ -93,6 +94,8 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
         return num;
     };
 
+    int bombNum = 0;
+
     if (move.bomb)
     {
         //  爆発
@@ -115,7 +118,7 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
                 }
             }
         }
-        erase();
+        bombNum = erase();
     }
     else
     {
@@ -204,7 +207,25 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
 
     histBlockNum.push_back((int)(histBlock.size() - blockNumBefore));
 
-    return Result(chain);
+    if (candChain)
+    {
+        //  連鎖数のみを返す
+        return Result(chain, 0LL, 0L, 0);
+    }
+    else
+    {
+        //  お邪魔ブロックストック
+        long long oj = chainScores[chain]/2 + bombScore[bombNum]/2;
+        long long rest = max(0LL, oj-ojama);
+        ojama = max(0LL, ojama-oj);
+
+        //  スキルゲージ
+        if (chain>0)
+            skill = max(100, skill+8);
+        int reduce = chain >= 3 ? 12+2*chain : 0;
+
+        return Result(chain, oj, rest, reduce);
+    }
 }
 
 //  candChain=trueならばcandChain専用の処理
