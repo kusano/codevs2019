@@ -69,6 +69,7 @@ public:
     int candBomb();
     int maxHeight();
     int blockNum();
+    //  TODO: ハッシュ値
 
     void save(State *state);
     void load(State &state);
