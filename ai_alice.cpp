@@ -60,12 +60,12 @@ void AIAlice::generateChainMove(Game &game)
 
                 Result result = field.move(m, game.packs[game.turn+depth]);
 
-                //  連鎖候補は長く、ブロックは多く、高さは低く
+                //  連鎖候補は長く、高さは低く、ブロックは多く
                 long long score = ((((
                     field.isDead() ? -1 : 0)*100LL +
                     field.candChain())*100LL +
                     -field.maxHeight())*100LL +
-                    -field.blockNum())*100LL +
+                    field.blockNum())*100LL +
                     random()%64;
 
                 Node nodeNew;
