@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <sstream>
 #include <cstring>
+#include <cassert>
 #include "table.h"
 
 using namespace std;
@@ -98,6 +99,9 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
 
     if (move.bomb)
     {
+        assert(skill >= 80);
+        skill = 0;
+
         //  爆発
         for (int x=0; x<W; x++)
         for (int y=0; y<H; y++)
@@ -221,7 +225,7 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
 
         //  スキルゲージ
         if (chain>0)
-            skill = max(100, skill+8);
+            skill = min(100, skill+8);
         int reduce = chain >= 3 ? 12+2*chain : 0;
 
         return Result(chain, oj, rest, reduce);
@@ -295,6 +299,40 @@ int Field::candChain()
     }
 
     return maxChain;
+}
+
+//  スキルを発動させたときに消えるブロック数を返す
+int Field::candBomb()
+{
+    static bool erase[W][H] = {};
+
+    for (int x=0; x<W; x++)
+    for (int y=0; y<H; y++)
+        if (field[x][y]==5)
+        {
+            for (int dx=-1; dx<=1; dx++)
+            for (int dy=-1; dy<=1; dy++)
+            {
+                int tx=x+dx;
+                int ty=y+dy;
+                if (0<=tx && tx<W &&
+                    0<=ty && ty<H &&
+                    1<=field[tx][ty] && field[tx][ty]<=9)
+                {
+                    erase[tx][ty] = true;
+                }
+            }
+        }
+
+    int num = 0;
+    for (int x=0; x<W; x++)
+    for (int y=0; y<H; y++)
+        if (erase[x][y])
+        {
+            erase[x][y] = false;
+            num++;
+        }
+    return num;
 }
 
 int Field::maxHeight()

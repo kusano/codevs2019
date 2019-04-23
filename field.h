@@ -66,6 +66,7 @@ public:
 
     bool isDead();
     int candChain();
+    int candBomb();
     int maxHeight();
     int blockNum();
 

@@ -10,11 +10,14 @@ public:
     Move think(Game &game) override;
 
 private:
-    static const int BeamDepth = 16;
-    static const int BeamWidth = 256;
+    static const int BeamChainDepth = 16;
+    static const int BeamChainWidth = 256;
+    static const int BeamBombDepth = 16;
+    static const int BeamBombWidth = 256;
 
     std::mt19937 random;
     std::vector<Move> moves;
 
-    void generateMove(Game &game);
+    void generateChainMove(Game &game);
+    void generateBombMove(Game &game);
 };
