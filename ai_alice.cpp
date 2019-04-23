@@ -38,9 +38,9 @@ Move AIAlice::think(Game &game)
 
         //  より手数が短くお邪魔ブロック数が多いものがbombにあれば選択
         //  bombは妨害されやすいので無条件に選択するとハマりそう
-        size_t chainDepth = best.moves.size();
+        int depth = max(4, (int)best.moves.size());
         bool replaced = false;
-        for (size_t d=0; d<=chainDepth; d++)
+        for (int d=0; d<=depth; d++)
             if (d<bomb.size() && bomb[d].available)
                 if (bomb[d].ojama > best.ojama)
                 {
