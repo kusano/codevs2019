@@ -12,8 +12,14 @@ void AIAlice::initialize(Game &game, int seed)
 
 Move AIAlice::think(Game &game)
 {
-    if (!checkMoves(game, bestMoves))
+    cerr<<"think start"<<endl;
+
+    if (checkMoves(game, bestMoves))
+        cerr<<"check moves ok"<<endl;
+    else
     {
+        cerr<<"check moves failed"<<endl;
+
         //  命令列を再計算
         vector<Moves> chain = generateChainMove(game, 16, 256);
         vector<Moves> bomb = generateBombMove(game, 16, 256);
@@ -26,14 +32,25 @@ Move AIAlice::think(Game &game)
                 if (!best.available ||
                     m.ojama > best.ojama)
                     best = m;
+        cerr<<"best chain moves: ("
+            <<"length: "<<best.moves.size()<<", "
+            <<"ojama: "<<best.ojama<<")"<<endl;
 
         //  より手数が短くお邪魔ブロック数が多いものがbombにあれば選択
         //  bombは妨害されやすいので無条件に選択するとハマりそう
         size_t chainDepth = best.moves.size();
+        bool replaced = false;
         for (size_t d=0; d<=chainDepth; d++)
             if (d<bomb.size() && bomb[d].available)
                 if (bomb[d].ojama > best.ojama)
+                {
                     best = bomb[d];
+                    replaced = true;
+                }
+        if (replaced)
+            cerr<<"replaced with bomb moves: ("
+                <<"length: "<<best.moves.size()<<", "
+                <<"ojama: "<<best.ojama<<")"<<endl;
 
         bestMoves = best;
     }
@@ -48,8 +65,12 @@ Move AIAlice::think(Game &game)
     else
     {
         //  どの命令でも死ぬ場合
+        cerr<<"no moves"<<endl;
+
         move = Move(0, 0, false);
     }
+
+    cerr<<"think finished"<<endl;
     return move;
 }
 
@@ -76,9 +97,10 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game, int beamDepth,
 
     for (int depth=0; depth<beamDepth; depth++)
     {
-        cerr<<depth<<endl;
         vector<Node> beamPre;
         beamPre.swap(beam);
+
+        int bestCandChain = 0;
 
         for (Node &node: beamPre)
         {
@@ -95,8 +117,11 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game, int beamDepth,
                 if (!field.isDead())
                 {
                     //  連鎖候補は長く、高さは低く、ブロックは多く
+                    int candChain = field.candChain();
+                    bestCandChain = max(bestCandChain, candChain);
+
                     long long score = (((
-                        field.candChain())*100LL +
+                        candChain)*100LL +
                         -field.maxHeight())*100LL +
                         field.blockNum())*100LL +
                         random()%64;
@@ -128,6 +153,10 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game, int beamDepth,
             [](const Node &a, const Node &b) {return a.score > b.score;});
         if ((int)beam.size() > beamWidth)
             beam.resize(beamWidth);
+
+        cerr<<"depth: "<<depth<<", "
+            <<"chain: "<<bestCandChain<<", "
+            <<"ojama: "<<bestMoves[depth+1].ojama<<endl;
     }
 
     return bestMoves;
@@ -155,7 +184,6 @@ vector<AIAlice::Moves> AIAlice::generateBombMove(Game &game, int beamDepth,
 
     for (int depth=0; depth<beamDepth; depth++)
     {
-        cerr<<depth<<endl;
         vector<Node> beamPre;
         beamPre.swap(beam);
 
@@ -230,6 +258,9 @@ vector<AIAlice::Moves> AIAlice::generateBombMove(Game &game, int beamDepth,
             bestMoves[depth+1].moves = beam[0].moves;
             bestMoves[depth+1].ojama = 0;
         }
+
+        cerr<<"depth: "<<depth<<", "
+            <<"ojama: "<<bestMoves[depth+1].ojama<<endl;
     }
 
     return bestMoves;
