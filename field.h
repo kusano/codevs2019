@@ -35,7 +35,7 @@ struct Result
         skillReduce(skillReduce) {}
 };
 
-//  履歴以外のフィールドの情報
+//  履歴と補助情報以外のフィールドの情報
 class State
 {
 public:
@@ -105,5 +105,6 @@ private:
     std::vector<Block> histBlock;
 
     //  消去処理に使用
+    static std::vector<Pos> updatePos;
     static std::vector<Pos> erasePos;
 };

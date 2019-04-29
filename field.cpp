@@ -7,11 +7,15 @@
 
 using namespace std;
 
+vector<Field::Pos> Field::updatePos;
 vector<Field::Pos> Field::erasePos;
 
 //  candChain=trueならばcandChain専用の処理
 Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
 {
+    assert(updatePos.empty());
+    assert(erasePos.empty());
+
     if (!candChain)
     {
         //  命令前の各値を記憶
@@ -60,9 +64,12 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
         int num = 0;
 
         //  undoの処理のため、yの降順にソート
-        //  TODO: 遅いので何とかする
         sort(erasePos.begin(), erasePos.end(),
             [](const Pos &a, const Pos &b) {return a.y > b.y;});
+
+        int updateCol[W];
+        for (int x=0; x<W; x++)
+            updateCol[x] = H;
 
         for (Pos &pos: erasePos)
             //  重複して登録されている場合がある
@@ -71,6 +78,7 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
                 histBlock.push_back(
                     Block(false, pos.x, pos.y, field[pos.x][pos.y]));
                 field[pos.x][pos.y] = 0;
+                updateCol[pos.x] = min(updateCol[pos.x], pos.y);
                 num++;
             }
         erasePos.clear();
@@ -78,7 +86,7 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
         for (int x=0; x<W; x++)
         {
             int fy = 0;
-            for (int y=0; y<H; y++)
+            for (int y=updateCol[x]; y<H; y++)
                 if (field[x][y]==0)
                 {
                     fy = max(fy, y+1);
@@ -87,6 +95,7 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
                     if (fy >= H)
                         break;
                     field[x][y] = field[x][fy];
+                    updatePos.push_back(Pos(x, y));
                     field[x][fy] = 0;
                     fy++;
                 }
@@ -133,6 +142,7 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
                 if (field[move.pos][y]==0)
                 {
                     field[move.pos][y] = pack[0];
+                    updatePos.push_back(Pos(move.pos, y));
                     histBlock.push_back(Block(true, move.pos, y, pack[0]));
                     break;
                 }
@@ -164,12 +174,13 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
                 for (int y=0; y<H; y++)
                     if (field[move.pos+x][y]==0)
                     {
-                        field[move.pos+x][y] = p[x][0];
-                        histBlock.push_back(
-                            Block(true, move.pos+x, y, p[x][y]));
-                        field[move.pos+x][y+1] = p[x][1];
-                        histBlock.push_back(
-                            Block(true, move.pos+x, y+1, p[x][y]));
+                        for (int dy=0; dy<2; dy++)
+                        {
+                            field[move.pos+x][y+dy] = p[x][dy];
+                            updatePos.push_back(Pos(move.pos+x, y+dy));
+                            histBlock.push_back(
+                                Block(true, move.pos+x, y+dy, p[x][dy]));
+                        }
                         break;
                     }
             }
@@ -181,26 +192,27 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
 
     while (true)
     {
-        static int DX[] = {0, 1, 1, 1};
-        static int DY[] = {1, 1, 0, -1};
-
-        for (int d=0; d<4; d++)
+        for (Pos &p: updatePos)
         {
-            int dx = DX[d];
-            int dy = DY[d];
-            int fx = 0;
-            int tx = dx==1 ? W-1 : W;
-            int fy = dy==-1 ? 1 : 0;
-            int ty = dy==1 ? H-1 : H;
+            int x = p.x;
+            int y = p.y;
 
-            for (int x=fx; x<tx; x++)
-            for (int y=fy; y<ty; y++)
-                if (field[x][y]+field[x+dx][y+dy]==10)
+            for (int dx=-1; dx<=1; dx++)
+            for (int dy=-1; dy<=1; dy++)
+            if (!(dx==0 && dy==0))
+            {
+                int tx = x + dx;
+                int ty = y + dy;
+                if (0<=tx && tx<W &&
+                    0<=ty && ty<H &&
+                    field[x][y]+field[x+dx][y+dy]==10)
                 {
                     erasePos.push_back(Pos(x, y));
                     erasePos.push_back(Pos(x+dx, y+dy));
                 }
+            }
         }
+        updatePos.clear();
 
         if (erasePos.empty())
             break;
