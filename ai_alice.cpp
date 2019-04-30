@@ -121,7 +121,13 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game, int beamDepth,
                     hash.count(field.hash)==0)
                 {
                     //  連鎖候補は長く、高さは低く、ブロックは多く
+
+                    //  お邪魔ブロックが1列降ってきても消せるようにする
+                    //  パックの向きを調整すれば良いので、
+                    //  お邪魔ブロックが無くてもたいていは消せるはず
+                    field.ojama += 10;
                     int candChain = field.candChain();
+                    field.ojama -= 10;
                     bestCandChain = max(bestCandChain, candChain);
 
                     long long score = (((
