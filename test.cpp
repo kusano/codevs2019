@@ -26,12 +26,15 @@ void test1()
     Field field;
 
     char old[Game::MaxTurn][Field::W][Field::H];
+    unsigned long long oldHash[Game::MaxTurn];
     mt19937 random;
     for (int i=0; i<254; i++)
     {
         memcpy(old[i], field.field, sizeof old[i]);
+        oldHash[i] = field.hash;
         field.candChain();
         assert(memcmp(old[i], field.field, sizeof old[i])==0);
+        assert(oldHash[i]==field.hash);
 
         field.move(Move(random()%9, random()%4, false), samplePacks[i]);
         assert(i==253 || !field.isDead());
@@ -41,6 +44,7 @@ void test1()
     field.undo();
     assert(!field.isDead());
     assert(memcmp(old[253], field.field, sizeof old[253])==0);
+    assert(oldHash[253]==field.hash);
 
     field.move(Move(0, 0, true), nullptr);
 
@@ -48,6 +52,7 @@ void test1()
     {
         field.undo();
         assert(memcmp(old[i], field.field, sizeof old[i])==0);
+        assert(oldHash[i]==field.hash);
     }
 }
 

@@ -1,6 +1,7 @@
 #include "ai_alice.h"
 #include <iostream>
 #include <algorithm>
+#include <set>
 #include <cassert>
 
 using namespace std;
@@ -99,6 +100,7 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game, int beamDepth,
     {
         vector<Node> beamPre;
         beamPre.swap(beam);
+        set<unsigned long long> hash;
 
         int bestCandChain = 0;
 
@@ -114,7 +116,8 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game, int beamDepth,
 
                 Result result = field.move(m, game.packs[game.turn+depth]);
 
-                if (!field.isDead())
+                if (!field.isDead() &&
+                    hash.count(field.hash)==0)
                 {
                     //  連鎖候補は長く、高さは低く、ブロックは多く
                     int candChain = field.candChain();
@@ -124,7 +127,7 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game, int beamDepth,
                         candChain)*100LL +
                         -field.maxHeight())*100LL +
                         field.blockNum())*100LL +
-                        random()%64;
+                        (long long)(field.hash & 0x3f);
 
                     vector<Move> moves = node.moves;
                     moves.push_back(m);
@@ -135,6 +138,7 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game, int beamDepth,
                     nodeNew.moves = moves;
 
                     beam.push_back(nodeNew);
+                    hash.insert(field.hash);
 
                     if (!bestMoves[depth+1].available ||
                         result.ojama > bestMoves[depth+1].ojama)

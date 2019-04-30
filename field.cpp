@@ -23,6 +23,7 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
         histSkill.push_back(skill);
         histScore.push_back(score);
     }
+    histHash.push_back(hash);
 
     size_t blockNumBefore = histBlock.size();
 
@@ -37,6 +38,7 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
                 if (field[move.pos][y]==0)
                 {
                     field[move.pos][y] = 11;
+                    //hash ^= hashField[move.pos][y][11];
                     histBlock.push_back(Block(true, move.pos, y, 11));
                     break;
                 }
@@ -51,6 +53,7 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
                     if (field[x][y]==0)
                     {
                         field[x][y] = 11;
+                        hash ^= hashField[x][y][11];
                         histBlock.push_back(Block(true, x, y, 11));
                         break;
                     }
@@ -77,6 +80,7 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
             {
                 histBlock.push_back(
                     Block(false, pos.x, pos.y, field[pos.x][pos.y]));
+                this->hash ^= hashField[pos.x][pos.y][field[pos.x][pos.y]];
                 field[pos.x][pos.y] = 0;
                 updateCol[pos.x] = min(updateCol[pos.x], pos.y);
                 num++;
@@ -95,7 +99,9 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
                     if (fy >= H)
                         break;
                     field[x][y] = field[x][fy];
+                    this->hash ^= hashField[x][y][field[x][fy]];
                     updatePos.push_back(Pos(x, y));
+                    this->hash ^= hashField[x][fy][field[x][fy]];
                     field[x][fy] = 0;
                     fy++;
                 }
@@ -142,6 +148,7 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
                 if (field[move.pos][y]==0)
                 {
                     field[move.pos][y] = pack[0];
+                    //hash ^= hashField[move.pos][y][pack[0]];
                     updatePos.push_back(Pos(move.pos, y));
                     histBlock.push_back(Block(true, move.pos, y, pack[0]));
                     break;
@@ -177,6 +184,7 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
                         for (int dy=0; dy<2; dy++)
                         {
                             field[move.pos+x][y+dy] = p[x][dy];
+                            hash ^= hashField[move.pos+x][y+dy][p[x][dy]];
                             updatePos.push_back(Pos(move.pos+x, y+dy));
                             histBlock.push_back(
                                 Block(true, move.pos+x, y+dy, p[x][dy]));
@@ -282,6 +290,8 @@ void Field::undo(bool candChain/*=false*/)
         score = histScore.back();
         histScore.pop_back();
     }
+    hash = histHash.back();
+    histHash.pop_back();
 }
 
 bool Field::isDead()
@@ -373,6 +383,7 @@ void Field::save(State *state)
     state->skill = skill;
     state->score = score;
     memcpy(state->field, field, sizeof state->field);
+    state->hash = hash;
 }
 
 void Field::load(State &state)
@@ -382,6 +393,7 @@ void Field::load(State &state)
     skill = state.skill;
     score = state.score;
     memcpy(field, state.field, sizeof field);
+    hash = state.hash;
 }
 
 string Field::toString()

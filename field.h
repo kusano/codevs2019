@@ -35,16 +35,17 @@ struct Result
         skillReduce(skillReduce) {}
 };
 
-//  履歴と補助情報以外のフィールドの情報
+//  履歴以外のフィールドの情報
 class State
 {
 public:
     int time = 0;
-    long long ojama = 0;
+    long long ojama = 0LL;
     int skill = 0;
-    long long score = 0;
+    long long score = 0LL;
     //char field[Field::W][Field::H] = {};
     char field[10][19] = {};
+    unsigned long long hash = 0ULL;
 };
 
 //  1人分のフィールド
@@ -60,6 +61,7 @@ public:
     long long score = 0;
     static_assert((char)-1 == -1, "char sign");
     char field[W][H] = {};
+    unsigned long long hash = 0ULL;
 
     Result move(Move move, char pack[4], bool candChain=false);
     void undo(bool candChain=false);
@@ -69,7 +71,6 @@ public:
     int candBomb();
     int maxHeight();
     int blockNum();
-    //  TODO: ハッシュ値
 
     void save(State *state);
     void load(State &state);
@@ -103,6 +104,7 @@ private:
     std::vector<long long> histScore;
     std::vector<int> histBlockNum;
     std::vector<Block> histBlock;
+    std::vector<unsigned long long> histHash;
 
     //  消去処理に使用
     static std::vector<Pos> updatePos;
