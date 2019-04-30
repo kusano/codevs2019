@@ -96,8 +96,9 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game, int beamDepth,
     game.fields[0].save(&beam[0].state);
 
     Field field;
+    long long maxOjama = 0;
 
-    for (int depth=0; depth<beamDepth; depth++)
+    for (int depth=0; depth<beamDepth && maxOjama<30; depth++)
     {
         vector<Node> beamPre;
         beamPre.swap(beam);
@@ -147,6 +148,7 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game, int beamDepth,
                         bestMoves[depth+1].available = true;
                         bestMoves[depth+1].moves = moves;
                         bestMoves[depth+1].ojama = result.ojama;
+                        maxOjama = max(maxOjama, result.ojama);
                     }
                 }
 
@@ -186,8 +188,9 @@ vector<AIAlice::Moves> AIAlice::generateBombMove(Game &game, int beamDepth,
     game.fields[0].save(&beam[0].state);
 
     Field field;
+    long long maxOjama = 0;
 
-    for (int depth=0; depth<beamDepth; depth++)
+    for (int depth=0; depth<beamDepth && maxOjama<30; depth++)
     {
         vector<Node> beamPre;
         beamPre.swap(beam);
@@ -245,6 +248,7 @@ vector<AIAlice::Moves> AIAlice::generateBombMove(Game &game, int beamDepth,
                         bestMoves[depth+1].moves = node.moves;
                         bestMoves[depth+1].moves.push_back(bomb);
                         bestMoves[depth+1].ojama = result.ojama;
+                        maxOjama = max(maxOjama, result.ojama);
                     }
                 }
 
