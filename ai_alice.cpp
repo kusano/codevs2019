@@ -190,6 +190,7 @@ vector<AIAlice::Moves> AIAlice::generateBombMove(Game &game, int beamDepth,
     {
         vector<Node> beamPre;
         beamPre.swap(beam);
+        set<unsigned long long> hash;
 
         for (Node &node: beamPre)
         {
@@ -203,14 +204,15 @@ vector<AIAlice::Moves> AIAlice::generateBombMove(Game &game, int beamDepth,
 
                 Result result = field.move(m, game.packs[game.turn+depth]);
 
-                if (!field.isDead())
+                if (!field.isDead() &&
+                    hash.count(field.hash)==0)
                 {
                     //  スキルゲージ、消せるブロック、その他のブロックを多く
                     long long score = (((
                         field.skill)*100LL +
                         field.candBomb())*100LL +
                         field.blockNum())*100LL +
-                        random()%64;
+                        (long long)(field.hash & 0x3f);
 
                     vector<Move> moves = node.moves;
                     moves.push_back(m);
@@ -221,6 +223,7 @@ vector<AIAlice::Moves> AIAlice::generateBombMove(Game &game, int beamDepth,
                     nodeNew.moves = moves;
 
                     beam.push_back(nodeNew);
+                    hash.insert(field.hash);
                 }
 
                 field.undo();
