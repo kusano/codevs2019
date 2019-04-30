@@ -18,6 +18,7 @@ private:
     };
 
     std::mt19937 random;
+    int rand = 0;
     Moves bestMoves;
 
     std::vector<Moves> generateChainMove(Game &game, int beamDepth,

@@ -9,6 +9,7 @@ using namespace std;
 void AIAlice::initialize(Game &game, int seed)
 {
     random.seed(seed);
+    rand = random()%64;
 };
 
 Move AIAlice::think(Game &game)
@@ -127,7 +128,7 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game, int beamDepth,
                         candChain)*100LL +
                         -field.maxHeight())*100LL +
                         field.blockNum())*100LL +
-                        (long long)(field.hash & 0x3f);
+                        (long long)(field.hash & 0x3f ^ rand);
 
                     vector<Move> moves = node.moves;
                     moves.push_back(m);
@@ -212,7 +213,7 @@ vector<AIAlice::Moves> AIAlice::generateBombMove(Game &game, int beamDepth,
                         field.skill)*100LL +
                         field.candBomb())*100LL +
                         field.blockNum())*100LL +
-                        (long long)(field.hash & 0x3f);
+                        (long long)(field.hash & 0x3f ^ rand);
 
                     vector<Move> moves = node.moves;
                     moves.push_back(m);
