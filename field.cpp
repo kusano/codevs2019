@@ -252,6 +252,14 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
     }
 }
 
+//  お邪魔ブロックとスキルゲージのやりとり
+//  moveと合わせてundoされる
+void Field::interact(Result self, Result enemy)
+{
+    ojama += max(0LL, enemy.ojamaRest-self.ojamaRest);
+    skill = max(0, skill-enemy.skillReduce);
+}
+
 //  candChain=trueならばcandChain専用の処理
 void Field::undo(bool candChain/*=false*/)
 {

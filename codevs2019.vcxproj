@@ -167,6 +167,7 @@
     <ClInclude Include="ai_chainer.h" />
     <ClInclude Include="ai_random.h" />
     <ClInclude Include="field.h" />
+    <ClInclude Include="game.h" />
     <ClInclude Include="status.h" />
     <ClInclude Include="table.h" />
   </ItemGroup>

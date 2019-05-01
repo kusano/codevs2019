@@ -21,6 +21,7 @@ private:
     int rand = 0;
     Moves bestMoves;
 
+    std::vector<std::vector<Result>> gaze(Game &game, int depth);
     std::vector<Moves> generateChainMove(Game &game, int beamDepth,
         int beamWidth);
     std::vector<Moves> generateBombMove(Game &game, int beamDepth,

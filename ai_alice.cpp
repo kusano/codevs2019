@@ -2,6 +2,7 @@
 #include <iostream>
 #include <algorithm>
 #include <set>
+#include <functional>
 #include <cassert>
 
 using namespace std;
@@ -15,6 +16,16 @@ void AIAlice::initialize(Game &game, int seed)
 Move AIAlice::think(Game &game)
 {
     cerr<<"think start"<<endl;
+
+    vector<vector<Result>> enemyResults = gaze(game, 2);
+    cerr<<"gaze:"<<endl;
+    for (int i=0; i<2; i++)
+    {
+        cerr<<(i==0 ? "ojama" : "skill");
+        for (Result &result: enemyResults[i])
+            cerr<<" ("<<result.ojamaRest<<", "<<result.skillReduce<<")";
+        cerr<<endl;
+    }
 
     if (checkMoves(game, bestMoves))
         cerr<<"check moves ok"<<endl;
@@ -74,6 +85,66 @@ Move AIAlice::think(Game &game)
 
     cerr<<"think finished"<<endl;
     return move;
+}
+
+//  相手の盤面をdepth手読み、お邪魔ブロック、スキル減少値が最大となるものを返す
+//  ret[0]がお邪魔ブロック最大、ret[1]がスキル減少値最大
+vector<vector<Result>> AIAlice::gaze(Game &game, int depth)
+{
+    Field &field = game.fields[1];
+
+    vector<vector<Result>> ret(2);
+    long long maxOjama = -1LL;
+    int maxSkillReduce = -1;
+
+    vector<Result> results;
+
+    function<void(int)> search = [&](int d)
+    {
+        if (d>=depth)
+        {
+            long long ojama = 0;
+            int skillReduce = 0;
+            for (Result &r: results)
+            {
+                ojama += r.ojamaRest;
+                skillReduce += r.skillReduce;
+            }
+
+            if (ojama > maxOjama)
+            {
+                maxOjama = ojama;
+                ret[0] = results;
+            }
+            if (skillReduce > maxSkillReduce)
+            {
+                maxSkillReduce = skillReduce;
+                ret[1] = results;
+            }
+        }
+        else
+        {
+            for (int m=0; m<(Field::W-1)*4+1; m++)
+            {
+                Move move(m/4, m%4, m==(Field::W-1)*4);
+
+                if (move.bomb && field.skill<80)
+                    continue;
+
+                Result result = field.move(move, game.packs[game.turn+d]);
+                if (!field.isDead())
+                {
+                    results.push_back(result);
+                    search(d+1);
+                    results.pop_back();
+                }
+                field.undo();
+            }
+        }
+    };
+    search(0);
+
+    return ret;
 }
 
 //  連鎖を狙う命令列を探索

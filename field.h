@@ -64,6 +64,7 @@ public:
     unsigned long long hash = 0ULL;
 
     Result move(Move move, char pack[4], bool candChain=false);
+    void interact(Result self, Result enemy);
     void undo(bool candChain=false);
 
     bool isDead();
