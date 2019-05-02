@@ -51,17 +51,15 @@ Move AIAlice::think(Game &game)
             <<"length: "<<best.moves.size()<<", "
             <<"ojama: "<<best.ojama<<")"<<endl;
 
-        //  より手数が短くお邪魔ブロック数が多いものがbombにあれば選択
-        //  bombは妨害されやすいので無条件に選択するとハマりそう
-        int depth = max(4, (int)best.moves.size());
+        //  よりお邪魔ブロック数が多いものがbombにあれば選択
         bool replaced = false;
-        for (int d=0; d<=depth; d++)
-            if (d<bomb.size() && bomb[d].available)
-                if (bomb[d].ojama > best.ojama)
-                {
-                    best = bomb[d];
-                    replaced = true;
-                }
+        for (Moves &m: bomb)
+            if (m.available &&
+                m.ojama > best.ojama)
+            {
+                best = m;
+                replaced = true;
+            }
         if (replaced)
             cerr<<"replaced with bomb moves: ("
                 <<"length: "<<best.moves.size()<<", "
