@@ -35,8 +35,9 @@ Move AIAlice::think(Game &game)
         cerr<<"check moves failed"<<endl;
 
         //  命令列を再計算
-        vector<Moves> chain = generateChainMove(game, enemyResults, 16, 256);
-        vector<Moves> bomb = generateBombMove(game, enemyResults, 16, 256);
+        int width = game.turn==0 ? 1024 : 256;
+        vector<Moves> chain = generateChainMove(game, enemyResults, 16, width);
+        vector<Moves> bomb = generateBombMove(game, enemyResults, 16, width);
 
         //  chainから最もお邪魔ブロック数が多いものを選択
         //  TODO: 浅いものを優先するべき？
