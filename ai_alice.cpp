@@ -16,8 +16,9 @@ void AIAlice::initialize(Game &game, int seed)
 Move AIAlice::think(Game &game)
 {
     cerr<<"think start"<<endl;
+    cerr<<"turn: "<<game.turn<<endl;
 
-    vector<vector<Result>> enemyResults = gaze(game, 2);
+    vector<vector<Result>> enemyResults = gaze(game, 1);
     cerr<<"gaze:"<<endl;
     for (int i=0; i<2; i++)
     {
@@ -27,15 +28,15 @@ Move AIAlice::think(Game &game)
         cerr<<endl;
     }
 
-    if (checkMoves(game, bestMoves))
+    if (checkMoves(game, enemyResults, bestMoves))
         cerr<<"check moves ok"<<endl;
     else
     {
         cerr<<"check moves failed"<<endl;
 
         //  命令列を再計算
-        vector<Moves> chain = generateChainMove(game, 16, 256);
-        vector<Moves> bomb = generateBombMove(game, 16, 256);
+        vector<Moves> chain = generateChainMove(game, enemyResults, 16, 256);
+        vector<Moves> bomb = generateBombMove(game, enemyResults, 16, 256);
 
         //  chainから最もお邪魔ブロック数が多いものを選択
         //  TODO: 浅いものを優先するべき？
@@ -149,8 +150,8 @@ vector<vector<Result>> AIAlice::gaze(Game &game, int depth)
 
 //  連鎖を狙う命令列を探索
 //  返り値retの長さはbeamDepth+1で、ret[d].movesにはd手の命令が格納されている
-vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game, int beamDepth,
-    int beamWidth)
+vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game,
+    vector<vector<Result>> &enemyResults, int beamDepth, int beamWidth)
 {
     struct Node
     {
@@ -187,6 +188,9 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game, int beamDepth,
                 Move m(pos, rotate, false);
 
                 Result result = field.move(m, game.packs[game.turn+depth]);
+                //  相手がお邪魔ブロック数の最大化を目指してきたと想定
+                if (depth<enemyResults[0].size())
+                    field.interact(result, enemyResults[0][depth]);
 
                 if (!field.isDead() &&
                     hash.count(field.hash)==0)
@@ -245,8 +249,8 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game, int beamDepth,
 }
 
 //  スキルを狙う命令列を探索
-vector<AIAlice::Moves> AIAlice::generateBombMove(Game &game, int beamDepth,
-    int beamWidth)
+vector<AIAlice::Moves> AIAlice::generateBombMove(Game &game,
+    vector<vector<Result>> &enemyResults, int beamDepth, int beamWidth)
 {
     struct Node
     {
@@ -281,6 +285,9 @@ vector<AIAlice::Moves> AIAlice::generateBombMove(Game &game, int beamDepth,
                 Move m(pos, rotate, false);
 
                 Result result = field.move(m, game.packs[game.turn+depth]);
+                //  相手がスキル減少を目指してきたと想定
+                if (depth<enemyResults[0].size())
+                    field.interact(result, enemyResults[0][depth]);
 
                 if (!field.isDead() &&
                     hash.count(field.hash)==0)
@@ -352,10 +359,16 @@ vector<AIAlice::Moves> AIAlice::generateBombMove(Game &game, int beamDepth,
 }
 
 //  現在のフィールドでこの命令列が想定通りに動くか確認
-bool AIAlice::checkMoves(Game &game, Moves &moves)
+bool AIAlice::checkMoves(Game &game, vector<vector<Result>> &enemyResults,
+    Moves &moves)
 {
     if (moves.moves.empty())
         return false;
+
+    //  movesがスキル発動を目的としているならばスキル減少値が最大、
+    //  連鎖目的ならばお邪魔ブロック数が最大の敵の動きを想定
+    bool bomb = moves.moves.back().bomb;
+    vector<Result> &enemyResult = bomb ? enemyResults[1] : enemyResults[0];
 
     Field &field = game.fields[0];
 
@@ -374,6 +387,8 @@ bool AIAlice::checkMoves(Game &game, Moves &moves)
         Result result = field.move(
             moves.moves[i],
             game.packs[game.turn+i]);
+        if (i<enemyResult.size())
+            field.interact(result, enemyResult[i]);
         count++;
 
         //  死なない

@@ -22,9 +22,12 @@ private:
     Moves bestMoves;
 
     std::vector<std::vector<Result>> gaze(Game &game, int depth);
-    std::vector<Moves> generateChainMove(Game &game, int beamDepth,
-        int beamWidth);
-    std::vector<Moves> generateBombMove(Game &game, int beamDepth,
-        int beamWidth);
-    bool checkMoves(Game &game, Moves &moves);
+    std::vector<Moves> generateChainMove(Game &game,
+        std::vector<std::vector<Result>> &enemyResults,
+        int beamDepth, int beamWidth);
+    std::vector<Moves> generateBombMove(Game &game,
+        std::vector<std::vector<Result>> &enemyResults,
+        int beamDepth, int beamWidth);
+    bool checkMoves(Game &game, std::vector<std::vector<Result>> &enemyResults,
+        Moves &moves);
 };
