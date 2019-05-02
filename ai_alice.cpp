@@ -361,7 +361,7 @@ vector<AIAlice::Moves> AIAlice::generateBombMove(Game &game,
 bool AIAlice::checkMoves(Game &game, vector<vector<Result>> &enemyResults,
     Moves &moves)
 {
-    if (moves.moves.empty())
+    if (moves.moves.size()<4)
         return false;
 
     //  movesがスキル発動を目的としているならばスキル減少値が最大、
