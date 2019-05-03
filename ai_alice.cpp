@@ -18,7 +18,7 @@ Move AIAlice::think(Game &game)
     cerr<<"think start"<<endl;
     cerr<<"turn: "<<game.turn<<endl;
 
-    vector<vector<Result>> enemyResults = gaze(game, 1);
+    vector<vector<Result>> enemyResults = gaze(game, 2);
     cerr<<"gaze:"<<endl;
     for (int i=0; i<2; i++)
     {
@@ -35,7 +35,7 @@ Move AIAlice::think(Game &game)
         cerr<<"check moves failed"<<endl;
 
         //  命令列を再計算
-        int width = game.turn==0 ? 1024 : 256;
+        int width = game.turn==0 ? 2048 : 512;
         vector<Moves> chain = generateChainMove(game, enemyResults, 16, width);
         vector<Moves> bomb = generateBombMove(game, enemyResults, 16, width);
 
@@ -51,15 +51,19 @@ Move AIAlice::think(Game &game)
             <<"length: "<<best.moves.size()<<", "
             <<"ojama: "<<best.ojama<<")"<<endl;
 
+        //  chainに良い手が無く、
         //  よりお邪魔ブロック数が多いものがbombにあれば選択
         bool replaced = false;
-        for (Moves &m: bomb)
-            if (m.available &&
-                m.ojama > best.ojama)
-            {
-                best = m;
-                replaced = true;
-            }
+        if (best.ojama < 30)
+        {
+            for (Moves &m: bomb)
+                if (m.available &&
+                    m.ojama > best.ojama)
+                {
+                    best = m;
+                    replaced = true;
+                }
+        }
         if (replaced)
             cerr<<"replaced with bomb moves: ("
                 <<"length: "<<best.moves.size()<<", "
@@ -105,10 +109,12 @@ vector<vector<Result>> AIAlice::gaze(Game &game, int depth)
         {
             long long ojama = 0;
             int skillReduce = 0;
-            for (Result &r: results)
+            int n = (int)results.size();
+            for (int i=0; i<n; i++)
             {
-                ojama += r.ojamaRest;
-                skillReduce += r.skillReduce;
+                //  速いターンに重みを付ける
+                ojama += results[i].ojamaRest * (n-i);
+                skillReduce += results[i].skillReduce * (n-i);
             }
 
             if (ojama > maxOjama)
@@ -242,6 +248,10 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game,
         cerr<<"depth: "<<depth<<", "
             <<"chain: "<<bestCandChain<<", "
             <<"ojama: "<<bestMoves[depth+1].ojama<<endl;
+
+        if (bestMoves[depth+1].available &&
+            bestMoves[depth+1].ojama >= 30)
+            break;
     }
 
     return bestMoves;
@@ -352,6 +362,10 @@ vector<AIAlice::Moves> AIAlice::generateBombMove(Game &game,
 
         cerr<<"depth: "<<depth<<", "
             <<"ojama: "<<bestMoves[depth+1].ojama<<endl;
+
+        if (bestMoves[depth+1].available &&
+            bestMoves[depth+1].ojama >= 160)
+            break;
     }
 
     return bestMoves;
