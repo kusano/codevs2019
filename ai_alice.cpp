@@ -35,9 +35,9 @@ Move AIAlice::think(Game &game)
         cerr<<"check moves failed"<<endl;
 
         //  命令列を再計算
-        int width = game.turn==0 ? 2048 : 1024;
+        int width = game.turn==0 ? 4096 : 2048;
         vector<Moves> chain = generateChainMove(game, enemyResults, 12, width);
-        vector<Moves> bomb = generateBombMove(game, enemyResults, 16, 256);
+        vector<Moves> bomb = generateBombMove(game, enemyResults, 12, 256);
 
         //  1.2^i
         static double ojamaCoef[] = {
