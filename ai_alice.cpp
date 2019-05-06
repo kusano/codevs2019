@@ -39,35 +39,61 @@ Move AIAlice::think(Game &game)
         vector<Moves> chain = generateChainMove(game, enemyResults, 12, width);
         vector<Moves> bomb = generateBombMove(game, enemyResults, 16, 256);
 
-        //  chainから最もお邪魔ブロック数が多いものを選択
-        //  TODO: 浅いものを優先するべき？
-        Moves best;
-        for (Moves &m: chain)
-            if (m.available)
-                if (!best.available ||
-                    m.ojama > best.ojama)
-                    best = m;
-        cerr<<"best chain moves: ("
-            <<"length: "<<best.moves.size()<<", "
-            <<"ojama: "<<best.ojama<<")"<<endl;
+        //  1.2^i
+        static double ojamaCoef[] = {
+                1.00,     1.20,     1.44,     1.73,     2.07,     2.49,     2.99,     3.58,
+                4.30,     5.16,     6.19,     7.43,     8.92,    10.70,    12.84,    15.41,
+               18.49,    22.19,    26.62,    31.95,    38.34,    46.01,    55.21,    66.25,
+               79.50,    95.40,   114.48,   137.37,   164.84,   197.81,   237.38,   284.85,
+              341.82,   410.19,   492.22,   590.67,   708.80,   850.56,  1020.67,  1224.81,
+             1469.77,  1763.73,  2116.47,  2539.77,  3047.72,  3657.26,  4388.71,  5266.46,
+             6319.75,  7583.70,  9100.44, 10920.53, 13104.63, 15725.56, 18870.67, 22644.80,
+            27173.76, 32608.52, 39130.22, 46956.26, 56347.51, 67617.02, 81140.42, 97368.50,
+        };
 
-        //  chainに良い手が無く、
-        //  よりお邪魔ブロック数が多いものがbombにあれば選択
-        bool replaced = false;
-        if (best.ojama < 30)
+        Moves best;
+        double bestOjama = -1.0;
+        bool isChain = false;
+
+        for (Moves &m: chain)
+        if (m.available)
         {
-            for (Moves &m: bomb)
-                if (m.available &&
-                    m.ojama > best.ojama)
-                {
-                    best = m;
-                    replaced = true;
-                }
+            double o = m.ojama/ojamaCoef[m.moves.size()];
+            cerr
+                <<"len: "<<m.moves.size()<<", "
+                <<"ojama: "<<m.ojama<<", "
+                <<"score: "<<o<<endl;
+            if (!best.available ||
+                 o > bestOjama)
+            {
+                best = m;
+                bestOjama = o;
+                isChain = true;
+            }
         }
-        if (replaced)
-            cerr<<"replaced with bomb moves: ("
-                <<"length: "<<best.moves.size()<<", "
-                <<"ojama: "<<best.ojama<<")"<<endl;
+        for (Moves &m: bomb)
+        if (m.available)
+        {
+            double o = m.ojama/ojamaCoef[m.moves.size()];
+            cerr
+                <<"len: "<<m.moves.size()<<", "
+                <<"ojama: "<<m.ojama<<", "
+                <<"score: "<<o<<endl;
+            if (!best.available ||
+                 o > bestOjama)
+            {
+                best = m;
+                bestOjama = o;
+                isChain = false;
+            }
+        }
+
+        cerr<<"best moves: ("
+            <<"length: "<<best.moves.size()<<", "
+            <<"ojama: "<<best.ojama<<", "
+            <<"score: "<<bestOjama<<", "
+            <<(isChain ? "chain" : "bomb")
+            <<")"<<endl;
 
         bestMoves = best;
     }
