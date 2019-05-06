@@ -317,15 +317,37 @@ int Field::candChain()
 
     int maxChain = 0;
     for (int x=0; x<W; x++)
-    for (int b=1; b<=9; b++)
     {
-        pack[0] = b;
-        Move move(x, 0, false);
+        //  連鎖になる数字のみ試す
+        bool c[10] = {};
+        int y = 0;
+        while (field[x][y]!=0)
+            y++;
+        if (ojama >= 10)
+            y++;
+        for (int dx=-1; dx<=1; dx++)
+        for (int dy=-1; dy<=1; dy++)
+        if (dx!=0 || dy!=0)
+        {
+            int tx = x+dx;
+            int ty = y+dy;
+            if (0<=tx && tx<W &&
+                0<=ty && ty<H &&
+                1<=field[tx][ty] && field[tx][ty]<=9)
+                c[10-field[tx][ty]] = true;
+        }
 
-        Result result = this->move(move, pack, true);
-        undo(true);
+        for (int b=1; b<=9; b++)
+        if (c[b])
+        {
+            pack[0] = b;
+            Move move(x, 0, false);
 
-        maxChain = max(maxChain, result.chain);
+            Result result = this->move(move, pack, true);
+            undo(true);
+
+            maxChain = max(maxChain, result.chain);
+        }
     }
 
     return maxChain;
