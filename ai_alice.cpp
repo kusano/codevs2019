@@ -238,8 +238,8 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game,
 
                     long long score = (((
                         candChain)*100LL +
-                        -field.maxHeight())*100LL +
                         field.blockNum())*100LL +
+                        -(max(0, field.maxHeight()-8)))*100LL +
                         (long long)(field.hash & 0x3f ^ rand);
 
                     vector<Move> moves = node.moves;
