@@ -35,7 +35,8 @@ Move AIAlice::think(Game &game)
         cerr<<"check moves failed"<<endl;
 
         //  命令列を再計算
-        int width = game.turn==0 ? 4096 : 2048;
+        int width = (int)(4096*(game.fields[0].time/180000.0));
+        cerr<<"width: "<<width<<endl;
         vector<Moves> chain = generateChainMove(game, enemyResults, 12, width);
         vector<Moves> bomb = generateBombMove(game, enemyResults, 12, 256);
 
