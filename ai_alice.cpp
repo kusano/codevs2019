@@ -49,7 +49,9 @@ Move AIAlice::think(Game &game)
         //  命令列を再計算
         int width = (int)(BEAM_WIDTH*(game.fields[0].time/180000.0));
         cerr<<"width: "<<width<<endl;
-        vector<Moves> chain = generateChainMove(game, enemyResults, 12, width);
+        int depth = game.turn==0 ? 14 : 12;
+        vector<Moves> chain = generateChainMove(game, enemyResults, depth,
+            width);
         vector<Moves> bomb = generateBombMove(game, enemyResults, 12, 256);
 
         //  1.1^i
