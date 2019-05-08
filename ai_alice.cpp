@@ -9,7 +9,7 @@ using namespace std;
 
 #ifdef LOCAL
     #define THREAD_NUM 6
-    #define BEAM_WIDTH 32768
+    #define BEAM_WIDTH 24576
 #else
     #define THREAD_NUM 1
     #define BEAM_WIDTH 4096
