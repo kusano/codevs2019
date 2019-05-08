@@ -19,6 +19,15 @@ using namespace std;
     #include <thread>
 #endif
 
+#ifndef LOCAL
+//  標準エラー出力でエラーになる？
+//  https://twitter.com/kakki_wriggle/status/1126145534018838529
+//  https://twitter.com/kakki_wriggle/status/1126146120780926977
+#include <sstream>
+static stringstream cerr_dummy;
+#define cerr cerr_dummy
+#endif
+
 void AIAlice::initialize(Game &game, int seed)
 {
     random.seed(seed);
