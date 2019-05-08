@@ -7,9 +7,6 @@
 
 using namespace std;
 
-vector<Field::Pos> Field::updatePos;
-vector<Field::Pos> Field::erasePos;
-
 //  candChain=trueならばcandChain専用の処理
 Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
 {
@@ -158,7 +155,7 @@ Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
         {
             //  パックの落下
             char p[2][2];
-            static int rotate[4][2][2] =
+            static const int rotate[4][2][2] =
             {
                 {{2, 0}, {3, 1}},
                 {{3, 2}, {1, 0}},
@@ -356,8 +353,6 @@ int Field::candChain()
 //  スキルを発動させたときに消えるブロック数を返す
 int Field::candBomb()
 {
-    static bool erase[W][H] = {};
-
     for (int x=0; x<W; x++)
     for (int y=0; y<H; y++)
         if (field[x][y]==5)
@@ -371,7 +366,7 @@ int Field::candBomb()
                     0<=ty && ty<H &&
                     1<=field[tx][ty] && field[tx][ty]<=9)
                 {
-                    erase[tx][ty] = true;
+                    eraseBlock[tx][ty] = true;
                 }
             }
         }
@@ -379,9 +374,9 @@ int Field::candBomb()
     int num = 0;
     for (int x=0; x<W; x++)
     for (int y=0; y<H; y++)
-        if (erase[x][y])
+        if (eraseBlock[x][y])
         {
-            erase[x][y] = false;
+            eraseBlock[x][y] = false;
             num++;
         }
     return num;

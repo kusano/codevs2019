@@ -108,6 +108,7 @@ private:
     std::vector<unsigned long long> histHash;
 
     //  消去処理に使用
-    static std::vector<Pos> updatePos;
-    static std::vector<Pos> erasePos;
+    std::vector<Pos> updatePos;
+    std::vector<Pos> erasePos;
+    bool eraseBlock[W][H] = {};
 };
