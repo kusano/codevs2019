@@ -66,6 +66,7 @@ void test2()
 
     chrono::system_clock::time_point start = chrono::system_clock::now();
 
+    game.fields[0].time = 180000;
     Move move = ai.think(game);
 
     chrono::system_clock::time_point end = chrono::system_clock::now();
