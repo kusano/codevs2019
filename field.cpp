@@ -8,7 +8,7 @@
 using namespace std;
 
 //  candChain=trueならばcandChain専用の処理
-Result Field::move(Move move, char pack[4], bool candChain/*=false*/)
+Result Field::move(Move move, const char pack[4], bool candChain/*=false*/)
 {
     assert(updatePos.empty());
     assert(erasePos.empty());
@@ -411,7 +411,7 @@ void Field::save(State *state)
     state->hash = hash;
 }
 
-void Field::load(State &state)
+void Field::load(const State &state)
 {
     time = state.time;
     ojama = state.ojama;

@@ -63,7 +63,7 @@ public:
     char field[W][H] = {};
     unsigned long long hash = 0ULL;
 
-    Result move(Move move, char pack[4], bool candChain=false);
+    Result move(Move move, const char pack[4], bool candChain=false);
     void interact(Result self, Result enemy);
     void undo(bool candChain=false);
 
@@ -74,7 +74,7 @@ public:
     int blockNum();
 
     void save(State *state);
-    void load(State &state);
+    void load(const State &state);
 
     std::string toString();
 
