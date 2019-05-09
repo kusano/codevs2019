@@ -260,9 +260,7 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game,
             bestCandChain = max(bestCandChain, bestCandChainThread[i]);
         }
 
-        sort(beam.begin(), beam.end());
-        if ((int)beam.size() > beamWidth)
-            beam.resize(beamWidth);
+        sortAndCull(&beam, beamWidth);
 
         cerr<<"depth: "<<depth<<", "
             <<"chain: "<<bestCandChain<<", "
@@ -348,9 +346,7 @@ void AIAlice::generateChainMoveThread(const Game &game, int depth,
 
     //  統合後にbeamWidth番目以降のノードが選択されることは無いので、
     //  ここで切り捨てる
-    sort(beamTemp.begin(), beamTemp.end());
-    if ((int)beamTemp.size() > beamWidth)
-        beamTemp.resize(beamWidth);
+    sortAndCull(&beamTemp, beamWidth);
 
     *beam = beamTemp;
     *bestMoves = bestMovesTemp;
@@ -437,10 +433,7 @@ vector<AIAlice::Moves> AIAlice::generateBombMove(Game &game,
             }
         }
 
-        sort(beam.begin(), beam.end(),
-            [](const Node &a, const Node &b) {return a.score > b.score;});
-        if ((int)beam.size() > beamWidth)
-            beam.resize(beamWidth);
+        sortAndCull(&beam, beamWidth);
 
         //  スキルを使用できなかった場合は
         //  最もスコアの高いノードの命令列を格納しておく
@@ -516,4 +509,21 @@ bool AIAlice::checkMoves(Game &game, vector<vector<Result>> &enemyResults,
         field.undo();
 
     return ok;
+}
+
+//  ソートして個数をsize個以下にする
+void AIAlice::sortAndCull(std::vector<Node> *beam, int size)
+{
+    std::vector<Node *> v;
+    for (Node &node: *beam)
+        v.push_back(&node);
+
+    sort(v.begin(), v.end(), [](Node *a, Node *b){return *a<*b;});
+    if ((int)v.size() > size)
+        v.resize(size);
+
+    vector<Node> tmp;
+    for (Node *p: v)
+        tmp.push_back(*p);
+    *beam = tmp;
 }

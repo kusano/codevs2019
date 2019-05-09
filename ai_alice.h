@@ -46,4 +46,5 @@ private:
         int beamDepth, int beamWidth);
     bool checkMoves(Game &game, std::vector<std::vector<Result>> &enemyResults,
         Moves &moves);
+    void sortAndCull(std::vector<Node> *beam, int size);
 };
