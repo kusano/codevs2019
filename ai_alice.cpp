@@ -215,16 +215,24 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game,
     game.fields[0].save(&beam[0].state);
 
     Field fieldThread[THREAD_NUM];
+    vector<Node> beamPre;
+    vector<Node> beamPreThread[THREAD_NUM];
+    vector<Node> beamThread[THREAD_NUM];
+    vector<Node *> beamTemp;
+    set<unsigned long long> hash;
 
     for (int depth=0; depth<beamDepth; depth++)
     {
-        vector<Node> beamPre;
+        beamPre.clear();
         beamPre.swap(beam);
 
-        vector<Node> beamPreThread[THREAD_NUM];
+        for (int i=0; i<THREAD_NUM; i++)
+        {
+            beamPreThread[i].clear();
+            beamThread[i].clear();
+        }
         for (size_t i=0; i<beamPre.size(); i++)
             beamPreThread[i%THREAD_NUM].push_back(beamPre[i]);
-        vector<Node> beamThread[THREAD_NUM];
         Moves bestMovesThread[THREAD_NUM];
         int bestCandChainThread[THREAD_NUM] = {};
 
@@ -247,12 +255,13 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game,
 #endif
 
         int bestCandChain = 0;
-        set<unsigned long long> hash;
+        hash.clear();
+        beamTemp.clear();
         for (int i=0; i<THREAD_NUM; i++)
         {
             for (Node &node: beamThread[i])
                 if (hash.count(node.state.hash)==0)
-                    beam.push_back(node);
+                    beamTemp.push_back(&node);
             if (bestMovesThread[i].available)
                 if (!bestMoves[depth+1].available ||
                     bestMovesThread[i].ojama > bestMoves[depth+1].ojama)
@@ -260,7 +269,11 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game,
             bestCandChain = max(bestCandChain, bestCandChainThread[i]);
         }
 
-        sortAndCull(&beam, beamWidth);
+        sort(beamTemp.begin(), beamTemp.end(), [](Node *a, Node *b){return *a<*b;});
+        if ((int)beamTemp.size() > beamWidth)
+            beamTemp.resize(beamWidth);
+        for (Node *node: beamTemp)
+            beam.push_back(*node);
 
         cerr<<"depth: "<<depth<<", "
             <<"chain: "<<bestCandChain<<", "
