@@ -81,22 +81,12 @@ public:
 private:
     struct Block
     {
-        bool add;   //  move時に追加したブロックは真、削除は偽
-        int x;
-        int y;
+        int pos;
         char block;
+        bool add;   //  move時に追加したブロックは真、削除は偽
 
-        Block(bool add, int x, int y, char block):
-            add(add), x(x), y(y), block(block) {}
-    };
-
-    struct Pos
-    {
-        int x;
-        int y;
-
-        Pos(int x, int y):
-            x(x), y(y) {}
+        Block(int pos, char block, bool add):
+            pos(pos), block(block), add(add) {}
     };
 
     //  undo用
@@ -108,7 +98,7 @@ private:
     std::vector<unsigned long long> histHash;
 
     //  消去処理に使用
-    std::vector<Pos> updatePos;
-    std::vector<Pos> erasePos;
-    bool eraseBlock[W][H] = {};
+    std::vector<int> updatePos;
+    std::vector<int> erasePos;
+    bool eraseBlock[W*H] = {};
 };

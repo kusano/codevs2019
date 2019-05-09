@@ -31,12 +31,12 @@ Result Field::move(Move move, const char pack[4], bool candChain/*=false*/)
         {
             //  ojamaの値を変動させない
             //  パックの位置にのみ落とす
-            for (int y=0; y<H; y++)
-                if (field[move.pos][y]==0)
+            for (int p=move.pos*H; ; p++)
+                if (field[0][p]==0)
                 {
-                    field[move.pos][y] = 11;
-                    //hash ^= hashField[move.pos][y][11];
-                    histBlock.push_back(Block(true, move.pos, y, 11));
+                    field[0][p] = 11;
+                    //hash ^= hashField[p][11];
+                    histBlock.push_back(Block(p, 11, true));
                     break;
                 }
         }
@@ -46,12 +46,12 @@ Result Field::move(Move move, const char pack[4], bool candChain/*=false*/)
 
             for (int x=0; x<W; x++)
             {
-                for (int y=0; y<H; y++)
-                    if (field[x][y]==0)
+                for (int p=x*H; ; p++)
+                    if (field[0][p]==0)
                     {
-                        field[x][y] = 11;
-                        hash ^= hashField[x][y][11];
-                        histBlock.push_back(Block(true, x, y, 11));
+                        field[0][p] = 11;
+                        hash ^= hashField[p][11];
+                        histBlock.push_back(Block(p, 11, true));
                         break;
                     }
             }
@@ -65,21 +65,23 @@ Result Field::move(Move move, const char pack[4], bool candChain/*=false*/)
 
         //  undoの処理のため、yの降順にソート
         sort(erasePos.begin(), erasePos.end(),
-            [](const Pos &a, const Pos &b) {return a.y > b.y;});
+            [](const int a, const int b) {
+                return positionToY[a] > positionToY[b];});
 
         int updateCol[W];
         for (int x=0; x<W; x++)
             updateCol[x] = H;
 
-        for (Pos &pos: erasePos)
+        for (int p: erasePos)
             //  重複して登録されている場合がある
-            if (field[pos.x][pos.y] != 0)
+            if (field[0][p] != 0)
             {
                 histBlock.push_back(
-                    Block(false, pos.x, pos.y, field[pos.x][pos.y]));
-                this->hash ^= hashField[pos.x][pos.y][field[pos.x][pos.y]];
-                field[pos.x][pos.y] = 0;
-                updateCol[pos.x] = min(updateCol[pos.x], pos.y);
+                    Block(p, field[0][p], false));
+                this->hash ^= hashField[p][field[0][p]];
+                field[0][p] = 0;
+                int x = positionToX[p];
+                updateCol[x] = min(updateCol[x], positionToY[p]);
                 num++;
             }
         erasePos.clear();
@@ -96,9 +98,9 @@ Result Field::move(Move move, const char pack[4], bool candChain/*=false*/)
                     if (fy >= H)
                         break;
                     field[x][y] = field[x][fy];
-                    this->hash ^= hashField[x][y][field[x][fy]];
-                    updatePos.push_back(Pos(x, y));
-                    this->hash ^= hashField[x][fy][field[x][fy]];
+                    this->hash ^= hashField[x*H+y][field[x][fy]];
+                    updatePos.push_back(x*H+y);
+                    this->hash ^= hashField[x*H+fy][field[x][fy]];
                     field[x][fy] = 0;
                     fy++;
                 }
@@ -115,22 +117,16 @@ Result Field::move(Move move, const char pack[4], bool candChain/*=false*/)
         skill = 0;
 
         //  爆発
-        for (int x=0; x<W; x++)
-        for (int y=0; y<H; y++)
+        for (int p=0; p<W*H; p++)
         {
-            if (field[x][y]==5)
+            if (field[0][p]==5)
             {
-                for (int dx=-1; dx<=1; dx++)
-                for (int dy=-1; dy<=1; dy++)
+                for (int d=0; d<8; d++)
                 {
-                    int tx = x + dx;
-                    int ty = y + dy;
-                    if (0<=tx && tx<W &&
-                        0<=ty && ty<H &&
-                        0<=field[tx][ty] && field[tx][ty]<=9)
-                    {
-                        erasePos.push_back(Pos(tx, ty));
-                    }
+                    int n = neighbor8[p][d];
+                    if (n!=p &&
+                        0<=field[0][n] && field[0][n]<=9)
+                        erasePos.push_back(n);
                 }
             }
         }
@@ -141,13 +137,13 @@ Result Field::move(Move move, const char pack[4], bool candChain/*=false*/)
         if (candChain)
         {
             //  pack[0]を落とす
-            for (int y=0; y<H; y++)
-                if (field[move.pos][y]==0)
+            for (int p=move.pos*H; ; p++)
+                if (field[0][p]==0)
                 {
-                    field[move.pos][y] = pack[0];
-                    //hash ^= hashField[move.pos][y][pack[0]];
-                    updatePos.push_back(Pos(move.pos, y));
-                    histBlock.push_back(Block(true, move.pos, y, pack[0]));
+                    field[0][p] = pack[0];
+                    //hash ^= hashField[p][pack[0]];
+                    updatePos.push_back(p);
+                    histBlock.push_back(Block(p, pack[0], true));
                     break;
                 }
         }
@@ -181,10 +177,10 @@ Result Field::move(Move move, const char pack[4], bool candChain/*=false*/)
                         for (int dy=0; dy<2; dy++)
                         {
                             field[move.pos+x][y+dy] = p[x][dy];
-                            hash ^= hashField[move.pos+x][y+dy][p[x][dy]];
-                            updatePos.push_back(Pos(move.pos+x, y+dy));
+                            hash ^= hashField[(move.pos+x)*H+(y+dy)][p[x][dy]];
+                            updatePos.push_back((move.pos+x)*H+(y+dy));
                             histBlock.push_back(
-                                Block(true, move.pos+x, y+dy, p[x][dy]));
+                                Block((move.pos+x)*H+(y+dy), p[x][dy], true));
                         }
                         break;
                     }
@@ -197,23 +193,16 @@ Result Field::move(Move move, const char pack[4], bool candChain/*=false*/)
 
     while (true)
     {
-        for (Pos &p: updatePos)
+        for (int &p: updatePos)
         {
-            int x = p.x;
-            int y = p.y;
-
-            for (int dx=-1; dx<=1; dx++)
-            for (int dy=-1; dy<=1; dy++)
-            if (!(dx==0 && dy==0))
+            for (int d=0; d<8; d++)
             {
-                int tx = x + dx;
-                int ty = y + dy;
-                if (0<=tx && tx<W &&
-                    0<=ty && ty<H &&
-                    field[x][y]+field[x+dx][y+dy]==10)
+                int n = neighbor8[p][d];
+                if (n!=p&&
+                    field[0][p]+field[0][n]==10)
                 {
-                    erasePos.push_back(Pos(x, y));
-                    erasePos.push_back(Pos(x+dx, y+dy));
+                    erasePos.push_back(p);
+                    erasePos.push_back(n);
                 }
             }
         }
@@ -271,16 +260,16 @@ void Field::undo(bool candChain/*=false*/)
 
         if (block.add)
         {
-            field[block.x][block.y] = 0;
+            field[0][block.pos] = 0;
         }
         else
         {
-            int y = block.y;
+            int p = block.pos;
             char b = block.block;
             while (b != 0)
             {
-                swap(b, field[block.x][y]);
-                y++;
+                swap(b, field[0][p]);
+                p++;
             }
         }
     }
@@ -322,16 +311,13 @@ int Field::candChain()
             y++;
         if (ojama >= 10)
             y++;
-        for (int dx=-1; dx<=1; dx++)
-        for (int dy=-1; dy<=1; dy++)
-        if (dx!=0 || dy!=0)
+        int p = x*H+y;
+        for (int d=0; d<8; d++)
         {
-            int tx = x+dx;
-            int ty = y+dy;
-            if (0<=tx && tx<W &&
-                0<=ty && ty<H &&
-                1<=field[tx][ty] && field[tx][ty]<=9)
-                c[10-field[tx][ty]] = true;
+            int n = neighbor8[p][d];
+            if (n!=p &&
+                1<=field[0][n] && field[0][n]<=9)
+                c[10-field[0][n]] = true;
         }
 
         for (int b=1; b<=9; b++)
@@ -353,30 +339,25 @@ int Field::candChain()
 //  スキルを発動させたときに消えるブロック数を返す
 int Field::candBomb()
 {
-    for (int x=0; x<W; x++)
-    for (int y=0; y<H; y++)
-        if (field[x][y]==5)
+    for (int p=0; p<W*H; p++)
+        if (field[0][p]==5)
         {
-            for (int dx=-1; dx<=1; dx++)
-            for (int dy=-1; dy<=1; dy++)
+            for (int d=0; d<8; d++)
             {
-                int tx=x+dx;
-                int ty=y+dy;
-                if (0<=tx && tx<W &&
-                    0<=ty && ty<H &&
-                    1<=field[tx][ty] && field[tx][ty]<=9)
+                int n = neighbor8[p][d];
+                if (n!=p &&
+                    1<=field[0][n] && field[0][n]<=9)
                 {
-                    eraseBlock[tx][ty] = true;
+                    eraseBlock[p] = true;
                 }
             }
         }
 
     int num = 0;
-    for (int x=0; x<W; x++)
-    for (int y=0; y<H; y++)
-        if (eraseBlock[x][y])
+    for (int p=0; p<W*H; p++)
+        if (eraseBlock[p])
         {
-            eraseBlock[x][y] = false;
+            eraseBlock[p] = false;
             num++;
         }
     return num;
@@ -394,9 +375,8 @@ int Field::maxHeight()
 int Field::blockNum()
 {
     int n = 0;
-    for (int x=0; x<W; x++)
-    for (int y=0; y<H; y++)
-        if (field[x][y] != 0)
+    for (int p=0; p<W*H; p++)
+        if (field[0][p] != 0)
             n++;
     return n;
 }
