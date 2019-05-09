@@ -125,7 +125,7 @@ Result Field::move(Move move, const char pack[4], bool candChain/*=false*/)
                 {
                     int n = neighbor8[p][d];
                     if (n!=p &&
-                        0<=field[0][n] && field[0][n]<=9)
+                        1<=field[0][n] && field[0][n]<=9)
                         erasePos.push_back(n);
                 }
             }
