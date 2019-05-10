@@ -261,7 +261,10 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game,
         {
             for (Node &node: beamThread[i])
                 if (hash.count(node.state.hash)==0)
+                {
                     beamTemp.push_back(&node);
+                    hash.insert(node.state.hash);
+                }
             if (bestMovesThread[i].available)
                 if (!bestMoves[depth+1].available ||
                     bestMovesThread[i].ojama > bestMoves[depth+1].ojama)
