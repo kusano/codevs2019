@@ -9,9 +9,11 @@ using namespace std;
 
 #ifdef LOCAL
     #define THREAD_NUM 8
+    #define BEAM_WIDTH_FIRST 45056
     #define BEAM_WIDTH 32768
 #else
     #define THREAD_NUM 1
+    #define BEAM_WIDTH_FIRST 4096
     #define BEAM_WIDTH 4096
 #endif
 
@@ -56,7 +58,9 @@ Move AIAlice::think(Game &game)
         cerr<<"check moves failed"<<endl;
 
         //  命令列を再計算
-        int width = (int)(BEAM_WIDTH*(game.fields[0].time/180000.0));
+        int width = game.turn==0 ?
+            BEAM_WIDTH_FIRST :
+            (int)(BEAM_WIDTH*(game.fields[0].time/180000.0));
         cerr<<"width: "<<width<<endl;
         int depth = game.turn==0 ? 14 : 12;
         vector<Moves> chain = generateChainMove(game, enemyResults, depth,
