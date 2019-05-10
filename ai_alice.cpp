@@ -226,10 +226,7 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game,
         beamPre.swap(beam);
 
         for (int i=0; i<THREAD_NUM; i++)
-        {
             beamPreThread[i].clear();
-            beamThread[i].clear();
-        }
         for (size_t i=0; i<beamPre.size(); i++)
             beamPreThread[i%THREAD_NUM].push_back(beamPre[i]);
         Moves bestMovesThread[THREAD_NUM];
