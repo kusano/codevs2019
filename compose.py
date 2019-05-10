@@ -17,6 +17,9 @@ F = [
 ]
 
 out = open("Main.cpp", "wb")  # for LF
+
+print >>out, '#pragma GCC optimize("no-aggressive-loop-optimizations")'
+
 for f in F:
   print>>out, "//  ==== %s ===="%f
   for l in open(f):
