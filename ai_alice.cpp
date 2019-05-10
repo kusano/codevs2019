@@ -218,7 +218,6 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game,
     vector<Node> beamPre;
     vector<Node> beamPreThread[THREAD_NUM];
     vector<Node> beamThread[THREAD_NUM];
-    vector<Node *> beamTemp;
     set<unsigned long long> hash;
 
     for (int depth=0; depth<beamDepth; depth++)
@@ -254,29 +253,39 @@ vector<AIAlice::Moves> AIAlice::generateChainMove(Game &game,
             &bestCandChainThread[0]);
 #endif
 
-        int bestCandChain = 0;
         hash.clear();
-        beamTemp.clear();
+        int ti[THREAD_NUM] = {};
+        for (int i=0; i<beamWidth; i++)
+        {
+            int t = -1;
+            for (int j=0; j<THREAD_NUM; j++)
+            {
+                while (
+                    ti[j]<(int)beamThread[j].size() &&
+                    hash.count(beamThread[j][ti[j]].state.hash)!=0)
+                    ti[j]++;
+                if (ti[j]>=(int)beamThread[j].size())
+                    continue;
+                if (t==-1 ||
+                    beamThread[j][ti[j]] < beamThread[t][ti[t]])
+                    t = j;
+            }
+            if (t==-1)
+                break;
+            beam.push_back(beamThread[t][ti[t]]);
+            hash.insert(beamThread[t][ti[t]].state.hash);
+            ti[t]++;
+        }
+
+        int bestCandChain = 0;
         for (int i=0; i<THREAD_NUM; i++)
         {
-            for (Node &node: beamThread[i])
-                if (hash.count(node.state.hash)==0)
-                {
-                    beamTemp.push_back(&node);
-                    hash.insert(node.state.hash);
-                }
             if (bestMovesThread[i].available)
                 if (!bestMoves[depth+1].available ||
                     bestMovesThread[i].ojama > bestMoves[depth+1].ojama)
                     bestMoves[depth+1] = bestMovesThread[i];
             bestCandChain = max(bestCandChain, bestCandChainThread[i]);
         }
-
-        sort(beamTemp.begin(), beamTemp.end(), [](Node *a, Node *b){return *a<*b;});
-        if ((int)beamTemp.size() > beamWidth)
-            beamTemp.resize(beamWidth);
-        for (Node *node: beamTemp)
-            beam.push_back(*node);
 
         cerr<<"depth: "<<depth<<", "
             <<"chain: "<<bestCandChain<<", "
