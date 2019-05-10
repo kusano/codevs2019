@@ -72,6 +72,7 @@ public:
     int candBomb();
     int maxHeight();
     int blockNum();
+    int chunkNum();
 
     void save(State *state);
     void load(const State &state);

@@ -11,6 +11,7 @@ using namespace std;
 void test1();
 void test2();
 void test3();
+void test4();
 void setField(Field *field, char f[16][10]);
 
 void test()
@@ -18,6 +19,7 @@ void test()
     test1();
     //test2();
     test3();
+    test4();
 }
 
 void test1()
@@ -132,6 +134,38 @@ void test3()
     assert(field.candChain()==4);
     field.ojama = 34;
     assert(field.candChain()==1);
+}
+
+void test4()
+{
+    //  お邪魔ブロックによって連鎖が可能になる
+    char f[16][10] =
+    {
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {9,11, 0, 1, 0, 0, 0, 2, 2, 0},
+    };
+
+    Field field;
+    setField(&field, f);
+    assert(field.chunkNum()==3);
+    field.field[2][0] = 5;
+    assert(field.chunkNum()==2);
+    field.field[0][0] = 0;
+    assert(field.chunkNum()==2);
 }
 
 void setField(Field *field, char f[16][10])

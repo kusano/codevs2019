@@ -317,7 +317,7 @@ void AIAlice::generateChainMoveThread(const Game &game, int depth,
             if (!field.isDead() &&
                 hash.count(field.hash)==0)
             {
-                //  連鎖候補は長く、高さは低く、ブロックは多く
+                //  連鎖候補は長く、ブロックは多く、ブロックをかため、高さは低く
 
                 //  お邪魔ブロックが1列降ってきても消せるようにする
                 //  パックの向きを調整すれば良いので、
@@ -327,9 +327,10 @@ void AIAlice::generateChainMoveThread(const Game &game, int depth,
                 field.ojama -= 10;
                 bestCandChainTemp = max(bestCandChainTemp, candChain);
 
-                long long score = (((
-                    candChain)*1000LL +
+                long long score = ((((
+                    candChain)*100LL +
                     field.blockNum())*100LL +
+                    -field.chunkNum())*100LL +
                     -(max(0, field.maxHeight()-8)))*100LL +
                     (long long)(field.hash & 0x3f ^ rand);
 

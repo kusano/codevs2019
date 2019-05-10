@@ -381,6 +381,16 @@ int Field::blockNum()
     return n;
 }
 
+int Field::chunkNum()
+{
+    int n = 0;
+    for (int x=0; x<W; x++)
+        if (field[x][0]!=0 &&
+            (x==0 || field[x-1][0]==0))
+            n++;
+    return n;
+}
+
 void Field::save(State *state)
 {
     state->time = time;
